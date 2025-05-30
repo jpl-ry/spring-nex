@@ -11,7 +11,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./employee_details_users.sql:/docker-entrypoint-initdb.d/employee_details_users.sql
     networks:
       - springboot-mysql
 
