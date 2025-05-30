@@ -3,32 +3,39 @@ version: '3.8'
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql-container
-    restart: always
+    container_name: mysql-db
     environment:
-      MYSQL_ROOT_PASSWORD: Root@123
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: employee_details
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./employee_details_users.sql:/docker-entrypoint-initdb.d/employee_details_users.sql
     ports:
       - "3306:3306"
-    volumes:
-      - ./employee_details_users.sql:/docker-entrypoint-initdb.d/employee_details_users.sql
     networks:
-      - springboot-mysql
+      - spring-net
 
   springboot-app:
-    build: .
-    container_name: springboot-container
-    ports:
-      - "8080:8080"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: springboot-app
     depends_on:
       - mysql
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/employee_details?useSSL=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: springuser
-      SPRING_DATASOURCE_PASSWORD: springpass
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/employee_details
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+    ports:
+      - "8080:8080"
     networks:
-      - springboot-mysql
+      - spring-net
+
+volumes:
+  mysql_data:
 
 networks:
-  springboot-mysql:
-
+  spring-net:
